@@ -1,0 +1,65 @@
+Cypress'ta Cucumber Yukleme Asamalari
+1-Masa ustunde(Ya da nerede olusturmak istersen) proje klasor' u olustur, sag tus yap  vscode ile ac
+2-Cypress yukleme asamalarini takip et
+-(Terminalde)  npm init
+-(Terminalde)  npm install --save-dev cypress
+-(Terminalde)  npx cypress open (browserda acilan cypress sayfasinda gerekli bolumleri sec)
+E2E testing -> continue ->Create new spec(bos bir spec dosysi olusturur) -> Create spec ->okay,run the spec
+********************************
+(terminal)   npm install --save-dev @badeball/cypress-cucumber-preprocessor  =>enter
+*******************************
+3-cypress.config.js file asagidaki code yapistir.(tamamen) 
+//  uzantiyi ts yap => cypress.config.ts
+import { defineConfig } from "cypress";
+import * as createBundler from "@bahmutov/cypress-esbuild-preprocessor";
+import { addCucumberPreprocessorPlugin } from "@badeball/cypress-cucumber-preprocessor";
+import { createEsbuildPlugin } from "@badeball/cypress-cucumber-preprocessor/esbuild";
+export default defineConfig({
+  e2e: {
+    specPattern: "**/*.feature",
+    async setupNodeEvents(
+      on: Cypress.PluginEvents,
+      config: Cypress.PluginConfigOptions
+    ): Promise<Cypress.PluginConfigOptions> {
+      // This is required for the preprocessor to be able to generate JSON reports after each run, and more,
+      await addCucumberPreprocessorPlugin(on, config);
+      on(
+        "file:preprocessor",
+        createBundler({
+          plugins: [createEsbuildPlugin(config)],
+        })
+      );
+      // Make sure to return the config object as it might have been modified by the plugin.
+      return config;
+    },
+  },
+});
+//iki yerde hata goreceksin korkma, asagidaki kodlarla cozeceksin
+*******************************************
+4- Terninalde =>  npm install --save-dev @bahmutov/cypress-esbuild-preprocessor   =>enter
+*********************************************
+5- tsconfig.json file olustur, bos bir alanda sag tus yap file olustur, tsconfig.json adini ver ve  icine asagidaki kodu yapistir
+{
+    "compilerOptions": {
+      "paths": {
+        "@badeball/cypress-cucumber-preprocessor/*": ["./node_modules/@badeball/cypress-cucumber-preprocessor/dist/subpath-entrypoints/*"]
+      }
+    }
+}
+************************************************
+//Terminal =>    npm install ts-loader --save-dev      =>enter
+**********************************************
+package.json icine sondan bir onceki  }, koy ve asigidaki kodu yapistir
+"cypress-cucumber-preprocessor":{
+    "stepDefinitions": "cypress/support/step_definitions/**/*.js"
+  }
+*****************************************************8
+ //cucumber plagin (alexander krechik )plagin i yukle(Vscode bir kere yuklenip tanimlanmissa tekrar yapmaya gerek yok)
+  ama yenı ekleyeceksenız asagıakı ıslemlerı yapmanız gerekır
+  file-> prefenses->settings-> Extencios-> cucumber Auto...->edit in setting.json   =>yolunu takip et acılan fıle da asagıdakı code ilgili yere ekle
+"cucumberautocomplete.strictGherkinCompletion": true,
+  "cucumberautocomplete.steps": [
+    "cypress/support/step_definitions/*.js"
+  ]
+    
+******************************************
